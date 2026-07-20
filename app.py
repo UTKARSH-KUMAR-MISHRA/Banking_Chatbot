@@ -10,7 +10,7 @@ from google.genai import types
 from google.genai.errors import ClientError, ServerError
 
 from langchain_chroma import Chroma
-from langchain_community.embeddings import SentenceTransformerEmbeddings
+from embeddings import GeminiEmbeddings
 
 st.set_page_config(page_title="Banking Mitra", page_icon="🏦", layout="wide")
 
@@ -253,10 +253,7 @@ def build_multimodal_payload(prompt, image_bytes=None, audio_bytes=None, audio_m
 
 
 def load_knowledge_base():
-    embedding_function = SentenceTransformerEmbeddings(
-        model_name="all-MiniLM-L6-v2",
-        model_kwargs={"local_files_only": False},
-    )
+    embedding_function = GeminiEmbeddings(client=client)
     if os.path.isdir("chroma_db"):
         return Chroma(persist_directory="chroma_db", embedding_function=embedding_function)
     return None
@@ -644,7 +641,7 @@ with main_col:
             cols = st.columns(len(topics))
             for col, topic in zip(cols, topics):
                 with col:
-                    if st.button(f"{topic['icon']} {topic['title']}", key=f"topic_{category}_{topic['title']}", use_container_width=True):
+                    if st.button(f"{topic['icon']} {topic['title']}", key=f"topic_{category}_{topic['title']}"):
                         st.session_state["queued_topic_prompt"] = topic["question"]
 
     st.markdown("<div style='height:10px;'></div>", unsafe_allow_html=True)
@@ -772,11 +769,11 @@ with main_col:
 
         response = None
         models_to_try = [
-            "gemini-flash-lite-latest",
+            "gemini-3.5-flash",
+            "gemini-3.1-flash-lite",
+            "gemini-2.0-flash",
+            "gemini-2.0-flash-lite",
             "gemini-flash-latest",
-            "gemini-pro-latest",
-            "gemini-2.5-flash",
-            "gemini-2.5-pro",
         ]
         error_message = None
 
